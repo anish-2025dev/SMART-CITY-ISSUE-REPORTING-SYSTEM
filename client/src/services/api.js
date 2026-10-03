@@ -6,6 +6,9 @@ const api = axios.create({ baseURL: "/api" });
 export const createReport = (formData) =>
   api.post("/reports", formData).then((res) => res.data);
 
+export const suggestCategory = (title, description) =>
+  api.post("/reports/categorize", { title, description }).then((res) => res.data);
+
 export const fetchReports = (params = {}) =>
   api.get("/reports", { params }).then((res) => res.data);
 
