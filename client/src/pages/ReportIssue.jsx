@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import LocationPicker from "../components/LocationPicker";
-import { createReport, getErrorMessage } from "../services/api";
+import { createReport, suggestCategory, getErrorMessage } from "../services/api";
 
 const CATEGORIES = [
   { value: "pothole", label: "Pothole" },
@@ -11,9 +11,11 @@ const CATEGORIES = [
   { value: "other", label: "Other" },
 ];
 
+const labelOf = (value) => CATEGORIES.find((c) => c.value === value)?.label || "Other";
+
 const MAX_PHOTO_MB = 5;
 const EMPTY_FORM = {
-  title: "", description: "", category: "other",
+  title: "", description: "", category: "auto",
   address: "", reporterName: "", reporterEmail: "",
 };
 
@@ -26,9 +28,31 @@ export default function ReportIssue() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState(null);
+  const [suggestion, setSuggestion] = useState(null); // { category, confidence }
 
   // Free the preview URL when it changes or the page closes
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
+
+  // Ask the server for a category while the user types (waits 500 ms after the last keystroke)
+  useEffect(() => {
+    if ((form.title + form.description).trim().length < 5) {
+      setSuggestion(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const result = await suggestCategory(form.title, form.description);
+        if (!cancelled) setSuggestion(result);
+      } catch {
+        if (!cancelled) setSuggestion(null); // suggestions are optional, never block the form
+      }
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [form.title, form.description]);
 
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -100,6 +124,7 @@ export default function ReportIssue() {
     setPreview("");
     setPosition(null);
     setCreated(null);
+    setSuggestion(null);
   };
 
   if (created) {
@@ -109,7 +134,8 @@ export default function ReportIssue() {
           <span className="badge resolved">Submitted</span>
           <h1>Report received</h1>
           <p className="muted">
-            Thanks. “{created.title}” is now on the map with status{" "}
+            Thanks. “{created.title}” was filed under <strong>{labelOf(created.category)}</strong>
+            {created.categorySource === "auto" ? " (detected automatically)" : ""} with status{" "}
             <span className="badge reported">{created.status}</span>
           </p>
           <div className="row">
@@ -143,8 +169,26 @@ export default function ReportIssue() {
         <label className="field">
           <span>Category</span>
           <select name="category" value={form.category} onChange={update}>
+            <option value="auto">Auto-detect (recommended)</option>
             {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
+          {form.category === "auto" && suggestion && (
+            <small className="hint">
+              {suggestion.category === "other"
+                ? "Couldn't tell the category from your text. It will be filed as Other, or pick one above."
+                : `We'll file this as ${labelOf(suggestion.category)}.`}
+            </small>
+          )}
+          {form.category !== "auto" && suggestion && suggestion.category !== "other"
+            && suggestion.category !== form.category && (
+            <small className="hint">
+              Your text sounds like {labelOf(suggestion.category)}.{" "}
+              <button type="button" className="link-btn"
+                      onClick={() => setForm({ ...form, category: suggestion.category })}>
+                Use {labelOf(suggestion.category)}
+              </button>
+            </small>
+          )}
         </label>
 
         <div className="field">
