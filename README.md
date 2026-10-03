@@ -1,6 +1,6 @@
 # Smart City Issue Reporting System
 
-Step 3: report form UI (photo preview, GPS, Leaflet map picker). API docs in API.md.
+Step 4: automatic (keyword) + manual categorization. API docs in API.md. Run `npm test` in server/ for categorizer tests.
 
 ## Run
 Requires Node 18+ and MongoDB (local or Atlas).

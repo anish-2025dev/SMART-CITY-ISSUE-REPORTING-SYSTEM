@@ -1,4 +1,4 @@
-# API reference (Step 2)
+# API reference (Step 4)
 
 ## POST /api/reports
 `multipart/form-data`
@@ -9,7 +9,7 @@
 | title | yes | max 120 chars |
 | description | yes | max 1000 chars |
 | lat, lng | yes | numbers |
-| category | no | pothole, garbage, streetlight, water_leak, other (default other) |
+| category | no | auto (default), pothole, garbage, streetlight, water_leak, other. With auto, the server detects it from title + description and sets `categorySource: "auto"` |
 | address, reporterName, reporterEmail | no | |
 
     curl -X POST http://localhost:5000/api/reports \
@@ -24,3 +24,8 @@ Query: `status`, `category`, `page`, `limit`. Returns `{ total, page, limit, rep
 
 ## GET /api/reports/:id
 Returns one report or 404.
+
+## POST /api/reports/categorize
+JSON body `{ "title": "...", "description": "..." }`.
+Returns `{ "category": "pothole", "confidence": 0.86, "matches": ["pothole", "road"] }`.
+Returns `category: "other"` with confidence 0 when nothing clear is found.

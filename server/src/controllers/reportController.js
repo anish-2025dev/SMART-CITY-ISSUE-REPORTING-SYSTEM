@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import Report, { CATEGORIES, STATUSES } from "../models/Report.js";
+import { categorize } from "../utils/categorizer.js";
 
 const removeFile = async (file) => {
   if (file?.path) await fs.unlink(file.path).catch(() => {});
@@ -23,14 +24,18 @@ export const createReport = async (req, res, next) => {
     if (!description?.trim()) throw badRequest("Description is required");
     if (!Number.isFinite(lat) || lat < -90 || lat > 90) throw badRequest("Valid latitude is required");
     if (!Number.isFinite(lng) || lng < -180 || lng > 180) throw badRequest("Valid longitude is required");
-    if (category && !CATEGORIES.includes(category)) {
-      throw badRequest(`Category must be one of: ${CATEGORIES.join(", ")}`);
+
+    // "auto" or empty -> detect from the text. Anything else must be a valid category.
+    const chosen = category && category !== "auto" ? category : null;
+    if (chosen && !CATEGORIES.includes(chosen)) {
+      throw badRequest(`Category must be one of: auto, ${CATEGORIES.join(", ")}`);
     }
 
     const report = await Report.create({
       title,
       description,
-      category: category || "other",
+      category: chosen || categorize(title, description).category,
+      categorySource: chosen ? "manual" : "auto",
       photo: `/uploads/${req.file.filename}`,
       location: { type: "Point", coordinates: [lng, lat] },
       address,
@@ -82,4 +87,10 @@ export const getReportById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+// POST /api/reports/categorize   { title, description } -> { category, confidence, matches }
+export const suggestCategory = (req, res) => {
+  const { title = "", description = "" } = req.body || {};
+  res.json(categorize(title, description));
 };

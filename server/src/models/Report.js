@@ -8,6 +8,8 @@ const reportSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true, maxlength: 120 },
     description: { type: String, required: true, trim: true, maxlength: 1000 },
     category: { type: String, enum: CATEGORIES, default: "other" },
+    // "auto" = chosen by the keyword categorizer, "manual" = chosen by the reporter
+    categorySource: { type: String, enum: ["auto", "manual"], default: "manual" },
     status: { type: String, enum: STATUSES, default: "reported" },
 
     // Path served by express.static, e.g. /uploads/1700000000-123.jpg
