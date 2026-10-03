@@ -1,6 +1,6 @@
 # Smart City Issue Reporting System
 
-Step 2: report model, photo upload, create/list/get report API (see API.md).
+Step 3: report form UI (photo preview, GPS, Leaflet map picker). API docs in API.md.
 
 ## Run
 Requires Node 18+ and MongoDB (local or Atlas).
