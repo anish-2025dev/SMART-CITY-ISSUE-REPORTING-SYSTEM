@@ -3,6 +3,15 @@ import mongoose from "mongoose";
 export const CATEGORIES = ["pothole", "garbage", "streetlight", "water_leak", "other"];
 export const STATUSES = ["reported", "in-progress", "resolved"];
 
+const historySchema = new mongoose.Schema(
+  {
+    status: { type: String, enum: STATUSES, required: true },
+    note: { type: String, trim: true, maxlength: 500, default: "" },
+    changedAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const reportSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 120 },
@@ -11,6 +20,9 @@ const reportSchema = new mongoose.Schema(
     // "auto" = chosen by the keyword categorizer, "manual" = chosen by the reporter
     categorySource: { type: String, enum: ["auto", "manual"], default: "manual" },
     status: { type: String, enum: STATUSES, default: "reported" },
+
+    // Timeline shown to citizens and managed by admins
+    statusHistory: { type: [historySchema], default: [] },
 
     // Path served by express.static, e.g. /uploads/1700000000-123.jpg
     photo: { type: String, required: true },
