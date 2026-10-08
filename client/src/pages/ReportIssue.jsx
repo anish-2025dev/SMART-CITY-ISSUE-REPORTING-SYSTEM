@@ -2,16 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import LocationPicker from "../components/LocationPicker";
 import { createReport, suggestCategory, getErrorMessage } from "../services/api";
+import { CATEGORIES, categoryLabel } from "../constants";
 
-const CATEGORIES = [
-  { value: "pothole", label: "Pothole" },
-  { value: "garbage", label: "Garbage" },
-  { value: "streetlight", label: "Broken streetlight" },
-  { value: "water_leak", label: "Water leak" },
-  { value: "other", label: "Other" },
-];
-
-const labelOf = (value) => CATEGORIES.find((c) => c.value === value)?.label || "Other";
+const labelOf = categoryLabel;
 
 const MAX_PHOTO_MB = 5;
 const EMPTY_FORM = {
@@ -139,7 +132,8 @@ export default function ReportIssue() {
             <span className="badge reported">{created.status}</span>
           </p>
           <div className="row">
-            <Link to="/" className="btn">View map</Link>
+            <Link to={`/reports/${created._id}`} className="btn">Track this report</Link>
+            <Link to="/" className="btn btn-outline">View map</Link>
             <button className="btn btn-accent" onClick={reset}>Report another issue</button>
           </div>
         </div>
