@@ -201,5 +201,3 @@ h2 { font-size: 1.15rem; font-weight: 800; margin: 24px 0 10px; }
   .legend { margin-left: 0; }
   .bar-row { grid-template-columns: 110px 1fr 30px; }
 }
-
-.back-link, .manage a { color: var(--primary); font-weight: 700; }

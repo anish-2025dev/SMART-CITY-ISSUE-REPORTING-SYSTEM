@@ -29,10 +29,7 @@ function FitToReports({ reports }) {
   const map = useMap();
   useEffect(() => {
     if (!reports.length) return;
-    if (reports.length === 1) {
-      map.setView(toLatLng(reports[0]), 16);
-      return; // an effect must not return a value other than a cleanup function
-    }
+    if (reports.length === 1) return map.setView(toLatLng(reports[0]), 16);
     map.fitBounds(L.latLngBounds(reports.map(toLatLng)), { padding: [40, 40], maxZoom: 16 });
   }, [reports, map]);
   return null;

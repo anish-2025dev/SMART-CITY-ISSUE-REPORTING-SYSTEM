@@ -16,12 +16,12 @@ export default function ReportDetail() {
     );
   }, [id]);
 
-  if (error) return <div className="container narrow"><div className="alert">{error}</div><p><Link to="/" className="back-link">Back to the map</Link></p></div>;
+  if (error) return <div className="container narrow"><div className="alert">{error}</div><p><Link to="/">Back to the map</Link></p></div>;
   if (!report) return <div className="container narrow"><p className="muted">Loading…</p></div>;
 
   return (
     <div className="container narrow">
-      <p><Link to="/" className="back-link">&larr; Back to the map</Link></p>
+      <p><Link to="/">&larr; Back to the map</Link></p>
       <div className="card detail">
         <img className="detail-photo" src={photoUrl(report.photo)} alt={report.title} />
         <div className="row"><StatusBadge status={report.status} /><strong>{categoryLabel(report.category)}</strong></div>
